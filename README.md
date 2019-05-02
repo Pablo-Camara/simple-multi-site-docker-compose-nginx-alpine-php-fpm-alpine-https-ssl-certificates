@@ -12,3 +12,7 @@ YOUR_DOCKER_CONTAINER_IP    site-two.com
 
 On Production:
 (Just set up your DNS normally)
+
+
+
+Accepting any suggestions on how to make the most out of this ideia / repo.
