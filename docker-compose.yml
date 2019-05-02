@@ -27,8 +27,8 @@ services:
         # site-one.com:
         # - Nginx Server block
       - ./sites/site-one.com/site.conf:/etc/nginx/sites-available/site-one.com.conf
-        # - Cloudflare certificates
-      - ./sites/site-one.com/certificates/:/etc/nginx/sites/site-one.com/certificates
+        # - Cloudflare certificates, uncomment if using certificates / ssl (see site-one.com/site.conf):
+      #- ./sites/site-one.com/certificates/:/etc/nginx/sites/site-one.com/certificates
         # - Public Folder:
       - ./sites/site-one.com/root/public/:/var/www/site-one.com/public
 
