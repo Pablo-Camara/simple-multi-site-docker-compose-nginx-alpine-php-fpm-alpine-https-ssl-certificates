@@ -39,7 +39,8 @@ services:
       - ./sites/site-two.com/root/public/:/var/www/site-two.com/public
     ports:
       - "80:80"
-      - "443:443"
+      # Uncomment if using HTTPS/SSL certificates
+      #- "443:443"
     depends_on:
       - php-fpm
     restart: always
