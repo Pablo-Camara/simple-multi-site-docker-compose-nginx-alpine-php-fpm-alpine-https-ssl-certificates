@@ -1,4 +1,14 @@
-# Simple multi-side server, using nginx:alpine and php:fpm-alpine
+# Simple multi-site server with docker-compose/nginx:alpine/php:fpm-alpine
 
-Quickly setup a multi site server, with nginx:alpine and php:fpm-alpine
-# Includes example on how to add HTTPS / SSL Certificates (in my case I had used cloudflare's one) 
+Quickly setup a multi site server, 
+ 
+ - Includes example on how to add HTTPS / SSL Certificates (in my case I had used cloudflare's one) 
+
+Locally:
+Don't forget to add to your hosts file (example):
+
+YOUR_DOCKER_CONTAINER_IP    site-one.com
+YOUR_DOCKER_CONTAINER_IP    site-two.com
+
+On Production:
+(Just set up your DNS normally)
