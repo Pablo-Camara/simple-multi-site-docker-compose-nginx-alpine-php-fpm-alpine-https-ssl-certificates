@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  php-fpm:
+    build:
+      context: ./docker/php-fpm
+    volumes:
+        # Mount PHP for each Public folder:
+
+        # site-one.com:
+        # - Public Folder:
+      - ./sites/site-one.com/root/public/:/var/www/site-one.com/public
+
+        # site-two.com:
+        # - Public Folder:
+      - ./sites/site-two.com/root/public/:/var/www/site-two.com/public
+  nginx:
+    build:
+      context: ./docker/nginx
+    volumes:
+        #Nginx Global Configurations
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d
+
+        #Nginx Configurations for you Sites:
+
+        # site-one.com:
+        # - Nginx Server block
+      - ./sites/site-one.com/site.conf:/etc/nginx/sites-available/site-one.com.conf
+        # - Cloudflare certificates
+      - ./sites/site-one.com/certificates/:/etc/nginx/sites/site-one.com/certificates
+        # - Public Folder:
+      - ./sites/site-one.com/root/public/:/var/www/site-one.com/public
+
+        # site-two.com:
+        # - Nginx Server block
+      - ./sites/site-two.com/site.conf:/etc/nginx/sites-available/site-two.com.conf
+        # - Public Folder:
+      - ./sites/site-two.com/root/public/:/var/www/site-two.com/public
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - php-fpm
+    restart: always
