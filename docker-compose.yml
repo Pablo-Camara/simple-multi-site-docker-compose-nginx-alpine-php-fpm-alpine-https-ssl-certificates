@@ -35,6 +35,8 @@ services:
         # site-two.com:
         # - Nginx Server block
       - ./sites/site-two.com/site.conf:/etc/nginx/sites-available/site-two.com.conf
+        # - Cloudflare certificates, uncomment if using certificates / ssl (see site-one.com/site.conf):
+      #- ./sites/site-two.com/certificates/:/etc/nginx/sites/site-two.com/certificates
         # - Public Folder:
       - ./sites/site-two.com/root/public/:/var/www/site-two.com/public
     ports:
