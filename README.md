@@ -1,14 +1,18 @@
-# WebServer for camara.pt
+# Simple multi-site server with docker-compose/nginx:alpine/php:fpm-alpine
 
-Main webserver for camara.pt and it's subdomains, and related company domains.
+Quickly setup a multi site server, 
+ 
+ - Includes example on how to add HTTPS / SSL Certificates (in my case I had used cloudflare's one), you just have to uncomment lines and edit the certificate files / add your own.
+ 
+Your just need to git clone this, docker-compose up,and edit your hosts file (example):
 
-Using Nginx,
-Cloudflare certificates,
-And gathering real IP from cloudflare header,
+YOUR_DOCKER_CONTAINER_IP    site-one.com
 
-Current websites:
+YOUR_DOCKER_CONTAINER_IP    site-two.com
 
-https://[www]camara.pt / https://pablo.camara.pt 
+On Production:
+(Just set up your DNS normally)
 
 
-to be continued..
+
+Accepting any suggestions on how to make the most out of this ideia / repo.
