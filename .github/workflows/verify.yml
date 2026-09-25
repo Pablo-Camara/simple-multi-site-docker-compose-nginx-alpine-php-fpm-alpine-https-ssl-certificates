@@ -1,0 +1,24 @@
+name: Verify stack
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose up --build --wait --wait-timeout 120
+      - run: python3 scripts/smoke-test.py
+      - run: scripts/check-isolation.sh
+      - run: scripts/local-certificate.sh
+      - run: docker compose -f docker-compose.yml -f compose.tls.yml up --wait
+      - run: scripts/check-tls.sh
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Stop stack
+        if: always()
+        run: docker compose down --volumes

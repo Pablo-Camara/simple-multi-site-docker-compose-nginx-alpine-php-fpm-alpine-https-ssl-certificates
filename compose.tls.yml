@@ -1,0 +1,7 @@
+services:
+  nginx:
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${HTTPS_PORT:-8443}:8443"
+    volumes:
+      - ./certificates:/etc/nginx/certificates:ro
+      - ./docker/nginx/snippets/tls-enabled.conf:/etc/nginx/snippets/tls.conf:ro
