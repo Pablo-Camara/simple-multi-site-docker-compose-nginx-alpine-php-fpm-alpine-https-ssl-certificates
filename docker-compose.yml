@@ -1,48 +1,72 @@
-version: '3'
+name: php-multisite
+
+x-php: &php
+  build: ./docker/php-fpm
+  user: "82:82"
+  read_only: true
+  mem_limit: 256m
+  pids_limit: 100
+  tmpfs:
+    - /tmp:mode=1777,size=16m
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  restart: unless-stopped
+  healthcheck:
+    test:
+      [
+        "CMD-SHELL",
+        "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong",
+      ]
+    interval: 10s
+    timeout: 3s
+    retries: 5
+    start_period: 5s
 
 services:
-  php-fpm:
-    build:
-      context: ./docker/php-fpm
+  site-one-php:
+    <<: *php
     volumes:
-        # Mount PHP for each Public folder:
+      - ./sites/site-one.com/root/public:/var/www/html:ro
+    networks: [site-one]
 
-        # site-one.com:
-        # - Public Folder:
-      - ./sites/site-one.com/root/public/:/var/www/site-one.com/public
+  site-two-php:
+    <<: *php
+    volumes:
+      - ./sites/site-two.com/root/public:/var/www/html:ro
+    networks: [site-two]
 
-        # site-two.com:
-        # - Public Folder:
-      - ./sites/site-two.com/root/public/:/var/www/site-two.com/public
   nginx:
-    build:
-      context: ./docker/nginx
-    volumes:
-        #Nginx Global Configurations
-      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./docker/nginx/conf.d/:/etc/nginx/conf.d
-
-        #Nginx Configurations for you Sites:
-
-        # site-one.com:
-        # - Nginx Server block
-      - ./sites/site-one.com/site.conf:/etc/nginx/sites-available/site-one.com.conf
-        # - Cloudflare certificates, uncomment if using certificates / ssl (see site-one.com/site.conf):
-      #- ./sites/site-one.com/certificates/:/etc/nginx/sites/site-one.com/certificates
-        # - Public Folder:
-      - ./sites/site-one.com/root/public/:/var/www/site-one.com/public
-
-        # site-two.com:
-        # - Nginx Server block
-      - ./sites/site-two.com/site.conf:/etc/nginx/sites-available/site-two.com.conf
-        # - Cloudflare certificates, uncomment if using certificates / ssl (see site-one.com/site.conf):
-      #- ./sites/site-two.com/certificates/:/etc/nginx/sites/site-two.com/certificates
-        # - Public Folder:
-      - ./sites/site-two.com/root/public/:/var/www/site-two.com/public
+    build: ./docker/nginx
+    read_only: true
+    mem_limit: 128m
+    pids_limit: 100
+    tmpfs:
+      - /tmp:mode=1777,size=32m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     ports:
-      - "80:80"
-      # Uncomment if using HTTPS/SSL certificates
-      #- "443:443"
+      - "${BIND_ADDRESS:-127.0.0.1}:${HTTP_PORT:-8080}:8080"
+    volumes:
+      - ./sites/site-one.com/root/public:/srv/site-one:ro
+      - ./sites/site-two.com/root/public:/srv/site-two:ro
+      - ./sites/assets:/srv/assets:ro
+    networks: [edge, site-one, site-two]
     depends_on:
-      - php-fpm
-    restart: always
+      site-one-php:
+        condition: service_healthy
+      site-two-php:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+# Workers have no shared network or source mount. NGINX is the only shared edge.
+networks:
+  edge: {}
+  site-one:
+    internal: true
+  site-two:
+    internal: true
